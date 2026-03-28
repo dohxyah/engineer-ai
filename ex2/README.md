@@ -169,8 +169,28 @@ Contained files:
 - ratings.csv → columns: userId, movieId, rating, timestamp
 - movies.csv → columns: movieId, title, genres
 
-Step 1 – Download & Extract the ZIP
-Download and preview the dataset using Pandas (directly extract from the ZIP file):
+#PRE MYSQL
+I have already running mysql server on
+docker run --name my-mysql \
+  -p 3306:3306 \
+  -e MYSQL_ROOT_PASSWORD=232323 \
+  -d mysql:8.0 \
+  --default-authentication-plugin=mysql_native_password
+
+# PRE conda
+Required packages: pip install pandas numpy matplotlib seaborn sqlalchemy mysql-connector-python ydata-profiling sweetviz dtale requests
+
+Self-Practice Exercise – Regression Models on MovieLens
+In this exercise, you will practice building and evaluating regression models using the
+MovieLens dataset and the workflow demonstrated in the regression lecture notebook.
+Dataset
+We will use the MovieLens dataset (public ZIP archive).
+Download: http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
+Contained files:
+- ratings.csv → columns: userId, movieId, rating, timestamp
+- movies.csv → columns: movieId, title, genres
+Step 1 – Download & Load the Data
+Use Pandas to read the ratings and movies data directly from the ZIP file.
 ```python
 import pandas as pd
 import requests
@@ -184,78 +204,39 @@ movies = pd.read_csv(z.open('ml-latest-small/movies.csv'))
 ratings.head()
 movies.head()
 ```
+Step 2 – Data Preparation
+1. Merge ratings and movies on movieId.
+2. Convert timestamp into datetime and extract year and month.
+3. Aggregate at the movie level:
+- Average rating per movie
+- Number of ratings per movie
+4. One-hot encode genres into dummy variables.
 
-# PRE MYSQL
-I have already running mysql server on
-docker run --name my-mysql \
-  -p 3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=232323 \
-  -d mysql:8.0 \
-  --default-authentication-plugin=mysql_native_password
-# PRE conda
-Required packages: pip install pandas numpy matplotlib seaborn sqlalchemy mysql-connector-python ydata-profiling sweetviz dtale requests
+Step 3 – Regression Models
+Build models to predict the average rating of a movie from its features.
+Models to implement:
+1. Linear Regression
+2. Ridge Regression (regularization)
+3. Lasso Regression (feature selection)
+Step 4 – Model Evaluation
+Calculate the model:
+- R2 score
+- RMSE (Root Mean Squared Error)
+Summarize results in a comparison table.
+Step 5 – Interpret Results
+Identify which features (e.g., genres, number of ratings) are most predictive.
 
-Step 2 – Save to MySQL
-1. Create a new database:
-```sql
-CREATE DATABASE movielens;
-USE movielens;
-```
-
-2. Create tables:
-```sql
-CREATE TABLE ratings (
-userId INT,
-movieId INT,
-rating FLOAT,
-timestamp BIGINT
-);
-CREATE TABLE movies (
-movieId INT,
-title VARCHAR(255),
-genres VARCHAR(255)
-);
-```
-3. Insert using Pandas + SQLAlchemy:
-```python
-from sqlalchemy import create_engine
-engine =
-create_engine('mysql+mysqlconnector://user:password@localhost:3306/movielens')
-ratings.to_sql('ratings', engine, if_exists='replace', index=False)
-movies.to_sql('movies', engine, if_exists='replace', index=False)
-```
-
-Step 3 – Query Back into Pandas
-Retrieve the data from MySQL into a DataFrame:
-```python
-ratings = pd.read_sql('SELECT * FROM ratings', engine)
-movies = pd.read_sql('SELECT * FROM movies', engine)
-```
-
-Step 4 – Manual EDA
-Perform EDA using Pandas, Matplotlib, and Seaborn:
-- Inspect structure with `info()` and `describe()`
-- Join ratings with movies
-- Top 10 movies by average rating (with minimum number of ratings)
-- Histogram of ratings distribution
-- Average rating per genre (expand genre column if needed)
-- Scatterplot of rating count vs average rating
-
-Step 5 – Automatic EDA
-Repeat the analysis using an **automatic EDA package** shown in the notebook (e.g.,
-pandas_profiling or sweetviz).
-- Generate a profile report for the ratings and movies data
-- Compare automated insights with your manual EDA findings
-
+Step 6 – Extensions (Optional, Advanced 🌟)
+1. Apply decision tree regressor on the data.
+Use tree visualization.
+Compare coefficients (linear models) vs feature importances (tree models).
+2. Add user-level features (average ratings given by each user).
+3. Predict individual ratings instead of movie-level average ratings.
+4. Try time-based splits: train on earlier ratings, test on later ones.
 Tasks
-1. Download and extract the ZIP, then inspect the first 5 rows of ratings and movies.
-2. Create the movielens database and load the data into MySQL.
-3. Query back into Pandas and confirm row counts match.
-4. Perform MANUAL EDA:
-- Top 10 highest-rated movies (with at least 20 ratings)
-- Average rating by genre
-- Histogram of ratings
-- Scatterplot of rating count vs average rating
-5. Perform AUTOMATIC EDA:
-- Generate an automated EDA report
-- Compare automated vs manual findings
+1. Download and preview ratings and movies.
+2. Merge, preprocess, and create features (average rating, number of ratings, genre
+dummies).
+4. Build and evaluate regression models (Linear, Ridge, Lasso).
+5. Compare models in a summary table (R2, RMSE).
+6. Interpret key features driving predictions.
